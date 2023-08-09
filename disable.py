@@ -4,6 +4,14 @@ import shutil
 AUTOMATOR_PATH = os.path.expanduser("~/Library/Workflows/Applications")
 SCRIPT_DIRS = {}
 
+def list_workflows(root_dir):
+    workflow_subdirectories = []
+    for root, dirs, files in os.walk(root_dir):
+        for dir_name in dirs:
+            if dir_name.endswith('.workflow'):
+                workflow_subdirectories.append(os.path.join(root, dir_name))
+    return workflow_subdirectories
+
 
 def get_scripts(path):
     ret = []
@@ -39,16 +47,17 @@ def main():
                 print("Creating 'Disabled' Directory...")
 
             for d in all_dirs:
-                SCRIPT_DIRS[d] = get_scripts(os.path.join(AUTOMATOR_PATH, d))
+                SCRIPT_DIRS[d] = list_workflows(os.path.join(AUTOMATOR_PATH, d))
 
             scripts = iter_scripts(SCRIPT_DIRS)
             print("Found {} scripts".format(len(scripts)))
+
             print("=====================================")
             print("Select the index to toggle\n<(*) = Enabled>")
             print("-------------------------------------")
 
             i = 0
-            for script in scripts:
+            for script in sorted(scripts):
                 parent, child = os.path.split(script)
                 parent, folder = os.path.split(parent)
                 _, disabled = os.path.split(parent)
